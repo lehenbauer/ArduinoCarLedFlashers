@@ -8,7 +8,7 @@
 #define LOWER_LEFT_LED 8
 #define UPPER_LEFT_LED 9
 #define UPPER_RIGHT_LED 10
-#define LOWER_RIGHT_LED 11 
+#define LOWER_RIGHT_LED 11
 
 #define DOWN 0
 #define UP 1
@@ -28,7 +28,7 @@ int program = 0;
 // the setup function runs once when you press reset or power the board
 void setup() {
   pinMode(PB_PIN, INPUT_PULLUP);
-  
+
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(LOWER_LEFT_LED, OUTPUT);
   pinMode(UPPER_LEFT_LED, OUTPUT);
@@ -64,6 +64,15 @@ void set_right(int state) {
 	digitalWrite (UPPER_RIGHT_LED, state);
 }
 
+void set_left_bottom(int state) {
+	digitalWrite (LOWER_LEFT_LED, state);
+}
+
+void set_right_bottom(int state) {
+	digitalWrite (LOWER_RIGHT_LED, state);
+}
+
+
 void set_diagonal1(int state) {
 	digitalWrite (UPPER_LEFT_LED, state);
 	digitalWrite (LOWER_RIGHT_LED, state);
@@ -86,7 +95,8 @@ void quick_flash (void (*func1)(int), void(*func2)(int)) {
 			func1(ON);
 			func2(OFF);
 			delay(50);
-			set_all(OFF);
+			func1(OFF);
+			func2(OFF);
 			delay(50);
 		}
 
@@ -97,7 +107,8 @@ void quick_flash (void (*func1)(int), void(*func2)(int)) {
 			func1(OFF);
 			func2(ON);
 			delay(50);
-			set_all(OFF);
+			func1(OFF);
+			func2(OFF);
 			delay(50);
 		}
 	}
@@ -129,6 +140,20 @@ void all_flash () {
 		}
 	}
 	slow_flash(set_diagonal1, set_diagonal2);
+}
+		
+void top_on_bottom_flash () {
+	int i;
+
+	set_upper(ON);
+
+	for (i = 0; i < 2; i++) {
+		quick_flash (set_left_bottom, set_right_bottom);
+		if (pushbutton_peek()) {
+			return;
+		}
+	}
+	slow_flash(set_left_bottom, set_right_bottom);
 }
 		
 		
@@ -169,7 +194,7 @@ int pushbutton_pressed () {
 void
 run_program () {
 	switch (program) {
-		case 0: 
+		case 0:
 			set_all(OFF);
 			return;
 
@@ -192,6 +217,10 @@ run_program () {
 			return;
 
 		case 5:
+			top_on_bottom_flash();
+			return;
+
+		case 6:
 			program = 0;
 	}
 }
@@ -203,8 +232,4 @@ void loop() {
 	}
 
 	run_program();
-
-  // switch_test();
-  // test_pattern();
-  // blink_all_at_once();
 }
