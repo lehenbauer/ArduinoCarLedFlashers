@@ -74,32 +74,49 @@ void set_diagonal2(int state) {
 	digitalWrite (LOWER_LEFT_LED, state);
 }
 
-void switch_test() {
-  if (digitalRead (PB_PIN) == LOW) {
-    set_all (ON);
-  } else {
-    set_all (OFF);
-  }
+void quick_flash (void (*func1)(int), void(*func2)(int)) {
+	int i;
+
+	for (i = 0; i < 3; i++) {
+		func1(ON);
+		func2(OFF);
+		delay(50);
+		set_all(OFF);
+		delay(50);
+	}
+
+	for (i = 0; i < 3; i++) {
+		func1(OFF);
+		func2(ON);
+		delay(50);
+		set_all(OFF);
+		delay(50);
+	}
 }
 
-void test_pattern() {
-    int led;
+void slow_flash (void (*func1)(int), void(*func2)(int)) {
+	int i;
 
-    for (led = LOWEST_LED; led <= HIGHEST_LED; led++) {
-      digitalWrite (led, HIGH);
-      delay(250);
-      digitalWrite (led, LOW);
-    }
+	for (i = 0; i < 4; i++) {
+		func1(ON);
+		func2(OFF);
+		delay(250);
+		func1(OFF);
+		func2(ON);
+		delay(250);
+	}
 }
 
-void blink_all_at_once () {
-  int led;
+void all_flash () {
+	int i;
 
-  set_all(ON);
-  delay(250);
-  set_all(OFF);
-  delay(250);
+	for (i = 0; i < 2; i++) {
+		quick_flash (set_diagonal1, set_diagonal2);
+	}
+	slow_flash(set_diagonal1, set_diagonal2);
 }
+		
+
 
 int pushbutton_pressed () {
 	// pin is low when button is pressed.
@@ -144,6 +161,10 @@ run_program () {
 			return;
 
 		case 4:
+			all_flash();
+			return;
+
+		case 5:
 			program = 0;
 	}
 }
