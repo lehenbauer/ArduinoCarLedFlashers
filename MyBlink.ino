@@ -115,7 +115,7 @@ int pushbutton_pressed () {
 		}
 	} else {
       digitalWrite (LED_BUILTIN, LOW);
-		if (pbState = DOWN) {
+		if (pbState == DOWN) {
 			pbState = UP;
 		}
 	}
