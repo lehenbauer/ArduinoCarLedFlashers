@@ -76,21 +76,30 @@ void set_diagonal2(int state) {
 
 void quick_flash (void (*func1)(int), void(*func2)(int)) {
 	int i;
+	int j;
 
-	for (i = 0; i < 3; i++) {
-		func1(ON);
-		func2(OFF);
-		delay(50);
-		set_all(OFF);
-		delay(50);
-	}
+	for (i = 0; i < 2; i++) {
+		for (j = 0; j < 3; j++) {
+			if (pushbutton_peek()) {
+				return;
+			}
+			func1(ON);
+			func2(OFF);
+			delay(50);
+			set_all(OFF);
+			delay(50);
+		}
 
-	for (i = 0; i < 3; i++) {
-		func1(OFF);
-		func2(ON);
-		delay(50);
-		set_all(OFF);
-		delay(50);
+		for (j = 0; j < 3; j++) {
+			if (pushbutton_peek()) {
+				return;
+			}
+			func1(OFF);
+			func2(ON);
+			delay(50);
+			set_all(OFF);
+			delay(50);
+		}
 	}
 }
 
@@ -98,7 +107,7 @@ void slow_flash (void (*func1)(int), void(*func2)(int)) {
 	int i;
 
 	for (i = 0; i < 4; i++) {
-		if (digitalRead (PB_PIN) == LOW) {
+		if (pushbutton_peek()) {
 			return;
 		}
 		func1(ON);
@@ -115,11 +124,26 @@ void all_flash () {
 
 	for (i = 0; i < 2; i++) {
 		quick_flash (set_diagonal1, set_diagonal2);
+		if (pushbutton_peek()) {
+			return;
+		}
 	}
 	slow_flash(set_diagonal1, set_diagonal2);
 }
 		
-
+		
+int pushbutton_peek () {
+	if (digitalRead (PB_PIN) == LOW) {
+		if (pbState == UP) {
+			return 1;
+		}
+		return 0;
+	} else {
+		if (pbState == DOWN) {
+			pbState = UP;
+		}
+	}
+}
 
 int pushbutton_pressed () {
 	// pin is low when button is pressed.
