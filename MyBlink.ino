@@ -113,6 +113,8 @@ void quick_flash (void (*func1)(int), void(*func2)(int)) {
 			delay(50);
 			if (pushbutton_peek()) return;
 		}
+		delay(50);
+		if (pushbutton_peek()) return;
 	}
 }
 
