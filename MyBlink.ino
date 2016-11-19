@@ -170,12 +170,13 @@ int pushbutton_pressed () {
 	// once per time it is pressed
 	if (digitalRead (PB_PIN) == LOW) {
       digitalWrite (LED_BUILTIN, HIGH);
+	  delay(50);  // debounce via a breif delay
 		if (pbState == UP) {
 			pbState = DOWN;
 			return 1;
 		}
 	} else {
-      digitalWrite (LED_BUILTIN, LOW);
+      // digitalWrite (LED_BUILTIN, LOW);
 		if (pbState == DOWN) {
 			pbState = UP;
 		}
@@ -183,25 +184,41 @@ int pushbutton_pressed () {
 	return 0;
 }
 
+void heartbeat () {
+	static int heartbeat = 0;
+
+	if (heartbeat++ > 20) {
+		digitalWrite (LED_BUILTIN, HIGH);
+		heartbeat = 0;
+	} else {
+		digitalWrite (LED_BUILTIN, LOW);
+	}
+}
+
 void
 run_program () {
+	heartbeat();
 	switch (program) {
 		case 0:
 			set_all(OFF);
+			delay(50);
 			return;
 
 		case 1:
 			set_upper(ON);
 			set_lower(OFF);
+			delay(50);
 			return;
 
 		case 2:
 			set_upper(OFF);
 			set_lower(ON);
+			delay(50);
 			return;
 
 		case 3:
 			set_all(ON);
+			delay(50);
 			return;
 
 		case 4:
