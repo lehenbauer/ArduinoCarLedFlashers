@@ -98,6 +98,9 @@ void slow_flash (void (*func1)(int), void(*func2)(int)) {
 	int i;
 
 	for (i = 0; i < 4; i++) {
+		if (digitalRead (PB_PIN) == LOW) {
+			return;
+		}
 		func1(ON);
 		func2(OFF);
 		delay(250);
