@@ -89,27 +89,29 @@ void quick_flash (void (*func1)(int), void(*func2)(int)) {
 
 	for (i = 0; i < 4; i++) {
 		for (j = 0; j < 3; j++) {
-			if (pushbutton_peek()) {
-				return;
-			}
+			if (pushbutton_peek()) return;
 			func1(ON);
 			func2(OFF);
 			delay(50);
+			if (pushbutton_peek()) return;
 			func1(OFF);
 			func2(OFF);
 			delay(50);
+			if (pushbutton_peek()) return;
 		}
+		delay(50);
+		if (pushbutton_peek()) return;
 
 		for (j = 0; j < 3; j++) {
-			if (pushbutton_peek()) {
-				return;
-			}
+			if (pushbutton_peek()) return;
 			func1(OFF);
 			func2(ON);
 			delay(50);
+			if (pushbutton_peek()) return;
 			func1(OFF);
 			func2(OFF);
 			delay(50);
+			if (pushbutton_peek()) return;
 		}
 	}
 }
@@ -118,15 +120,11 @@ void slow_flash (void (*func1)(int), void(*func2)(int)) {
 	int i;
 
 	for (i = 0; i < 4; i++) {
-		if (pushbutton_peek()) {
-			return;
-		}
+		if (pushbutton_peek()) return;
 		func1(ON);
 		func2(OFF);
 		delay(250);
-		if (pushbutton_peek()) {
-			return;
-		}
+		if (pushbutton_peek()) return;
 		func1(OFF);
 		func2(ON);
 		delay(250);
@@ -137,9 +135,7 @@ void all_flash () {
 	int i;
 
 	quick_flash (set_diagonal1, set_diagonal2);
-	if (pushbutton_peek()) {
-		return;
-	}
+	if (pushbutton_peek()) return;
 	slow_flash(set_diagonal1, set_diagonal2);
 }
 		
@@ -149,9 +145,7 @@ void top_on_bottom_flash () {
 	set_upper(ON);
 
 	quick_flash (set_left_bottom, set_right_bottom);
-	if (pushbutton_peek()) {
-		return;
-	}
+	if (pushbutton_peek()) return;
 }
 		
 		
