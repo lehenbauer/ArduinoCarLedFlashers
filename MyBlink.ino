@@ -10,6 +10,21 @@
 #define UPPER_RIGHT_LED 10
 #define LOWER_RIGHT_LED 11 
 
+#define DOWN 0
+#define UP 1
+
+#define ON HIGH
+#define OFF LOW
+
+
+
+int pbState = UP;
+
+int upperSolidOn = 0;
+int lowerSolidOn = 0;
+
+int program = 0;
+
 // the setup function runs once when you press reset or power the board
 void setup() {
   pinMode(PB_PIN, INPUT_PULLUP);
@@ -21,28 +36,49 @@ void setup() {
   pinMode(LOWER_RIGHT_LED, OUTPUT);
 }
 
-
-void all_on() {
+void set_all(int state) {
   int led;
 
     for (led = LOWEST_LED; led <= HIGHEST_LED; led++) {
-      digitalWrite (led, HIGH);
+      digitalWrite (led, state);
     }
 }
 
-void all_off() {
-  int led;
-  
-    for (led = LOWEST_LED; led <= HIGHEST_LED; led++) {
-      digitalWrite (led, LOW);
-    }
+void set_upper(int state) {
+	digitalWrite (UPPER_LEFT_LED, state);
+	digitalWrite (UPPER_RIGHT_LED, state);
+}
+
+void set_lower(int state) {
+	digitalWrite (LOWER_LEFT_LED, state);
+	digitalWrite (LOWER_RIGHT_LED, state);
+}
+
+void set_left(int state) {
+	digitalWrite (LOWER_LEFT_LED, state);
+	digitalWrite (UPPER_LEFT_LED, state);
+}
+
+void set_right(int state) {
+	digitalWrite (LOWER_RIGHT_LED, state);
+	digitalWrite (UPPER_RIGHT_LED, state);
+}
+
+void set_diagonal1(int state) {
+	digitalWrite (UPPER_LEFT_LED, state);
+	digitalWrite (LOWER_RIGHT_LED, state);
+}
+
+void set_diagonal2(int state) {
+	digitalWrite (UPPER_RIGHT_LED, state);
+	digitalWrite (LOWER_LEFT_LED, state);
 }
 
 void switch_test() {
   if (digitalRead (PB_PIN) == LOW) {
-    all_on ();
+    set_all (ON);
   } else {
-    all_off ();
+    set_all (OFF);
   }
 }
 
@@ -59,16 +95,68 @@ void test_pattern() {
 void blink_all_at_once () {
   int led;
 
-  all_on();
+  set_all(ON);
   delay(250);
-  all_off();
+  set_all(OFF);
   delay(250);
+}
+
+int pushbutton_pressed () {
+	// pin is low when button is pressed.
+	// when it is pressed we will be called
+	// many times while it is down so we keep
+	// track of its state and only return 1
+	// once per time it is pressed
+	if (digitalRead (PB_PIN) == LOW) {
+      digitalWrite (LED_BUILTIN, HIGH);
+		if (pbState == UP) {
+			pbState = DOWN;
+			return 1;
+		}
+	} else {
+      digitalWrite (LED_BUILTIN, LOW);
+		if (pbState = DOWN) {
+			pbState = UP;
+		}
+	}
+	return 0;
+}
+
+void
+run_program () {
+	switch (program) {
+		case 0: 
+			set_all(OFF);
+			return;
+
+		case 1:
+			set_upper(ON);
+			set_lower(OFF);
+			return;
+
+		case 2:
+			set_upper(OFF);
+			set_lower(ON);
+			return;
+
+		case 3:
+			set_all(ON);
+			return;
+
+		case 4:
+			program = 0;
+	}
 }
 
 // the loop function runs over and over again forever
 void loop() {
-  switch_test();
+	if (pushbutton_pressed()) {
+		program++;
+	}
 
+	run_program();
+
+  // switch_test();
   // test_pattern();
   // blink_all_at_once();
 }
