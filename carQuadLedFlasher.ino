@@ -1,6 +1,6 @@
 
 // pushbutton pin
-#define PB_PIN 2
+#define PB_PIN 12
 
 #define LOWEST_LED 8
 #define HIGHEST_LED 11
@@ -9,6 +9,9 @@
 #define UPPER_LEFT_LED 9
 #define UPPER_RIGHT_LED 10
 #define LOWER_RIGHT_LED 11
+
+#define STATUS_LED LED_BUILTIN
+#define DIAGNOSTIC_LED 13
 
 #define DOWN 0
 #define UP 1
@@ -27,13 +30,18 @@ int program = 0;
 
 // the setup function runs once when you press reset or power the board
 void setup() {
+  // configure pushbutton for input with internal pullup
+  // switch will be open or shorted, so with the pullup we will
+  // see state of 1 when open, 0 when pressed
   pinMode(PB_PIN, INPUT_PULLUP);
 
-  pinMode(LED_BUILTIN, OUTPUT);
+  // configure for output all DIO pins driving LEDs
+  pinMode(DIAGNOSTIC_LED, OUTPUT);
   pinMode(LOWER_LEFT_LED, OUTPUT);
   pinMode(UPPER_LEFT_LED, OUTPUT);
   pinMode(UPPER_RIGHT_LED, OUTPUT);
   pinMode(LOWER_RIGHT_LED, OUTPUT);
+  pinMode(STATUS_LED, OUTPUT);
 }
 
 void set_all(int state) {
@@ -92,10 +100,12 @@ void quick_flash (void (*func1)(int), void(*func2)(int)) {
 			if (pushbutton_peek()) return;
 			func1(ON);
 			func2(OFF);
+			set_status(ON);
 			delay(50);
 			if (pushbutton_peek()) return;
 			func1(OFF);
 			func2(OFF);
+			set_status(OFF);
 			delay(50);
 			if (pushbutton_peek()) return;
 		}
@@ -106,10 +116,12 @@ void quick_flash (void (*func1)(int), void(*func2)(int)) {
 			if (pushbutton_peek()) return;
 			func1(OFF);
 			func2(ON);
+			set_status(ON);
 			delay(50);
 			if (pushbutton_peek()) return;
 			func1(OFF);
 			func2(OFF);
+			set_status(OFF);
 			delay(50);
 			if (pushbutton_peek()) return;
 		}
@@ -125,10 +137,12 @@ void slow_flash (void (*func1)(int), void(*func2)(int)) {
 		if (pushbutton_peek()) return;
 		func1(ON);
 		func2(OFF);
+		set_status(ON);
 		delay(250);
 		if (pushbutton_peek()) return;
 		func1(OFF);
 		func2(ON);
+		set_status(OFF);
 		delay(250);
 	}
 }
@@ -171,14 +185,14 @@ int pushbutton_pressed () {
 	// track of its state and only return 1
 	// once per time it is pressed
 	if (digitalRead (PB_PIN) == LOW) {
-      digitalWrite (LED_BUILTIN, HIGH);
+      digitalWrite (DIAGNOSTIC_LED, HIGH);
 	  delay(50);  // debounce via a breif delay
 		if (pbState == UP) {
 			pbState = DOWN;
 			return 1;
 		}
 	} else {
-      // digitalWrite (LED_BUILTIN, LOW);
+      // digitalWrite (DIAGNOSTIC_LED, LOW);
 		if (pbState == DOWN) {
 			pbState = UP;
 		}
@@ -186,14 +200,18 @@ int pushbutton_pressed () {
 	return 0;
 }
 
+void set_status (int state) {
+	digitalWrite (STATUS_LED, state);
+}
+
 void heartbeat () {
 	static int heartbeat = 0;
 
 	if (heartbeat++ > 20) {
-		digitalWrite (LED_BUILTIN, HIGH);
+		digitalWrite (DIAGNOSTIC_LED, HIGH);
 		heartbeat = 0;
 	} else {
-		digitalWrite (LED_BUILTIN, LOW);
+		digitalWrite (DIAGNOSTIC_LED, LOW);
 	}
 }
 
@@ -203,23 +221,28 @@ run_program () {
 	switch (program) {
 		case 0:
 			set_all(OFF);
+			set_status (OFF);
 			delay(50);
 			return;
 
 		case 1:
 			set_upper(ON);
 			set_lower(OFF);
+			set_status (ON);
 			delay(50);
 			return;
 
 		case 2:
 			set_upper(OFF);
 			set_lower(ON);
+			set_status (ON);
 			delay(50);
 			return;
 
 		case 3:
 			set_all(ON);
+			digitalWrite (STATUS_LED, ON);
+			set_status (ON);
 			delay(50);
 			return;
 
